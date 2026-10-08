@@ -269,6 +269,20 @@ def delete_alert(id):
     db.session.commit()
     return jsonify({'success': True, 'message': 'Alert deleted successfully'})
 
+import socket
+
+def find_available_port(default_port=5000):
+    for p in [default_port, 5001, 5050, 8080]:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(('127.0.0.1', p)) != 0:
+                return p
+    return default_port
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    configured_port = int(os.environ.get('PORT', 5000))
+    port = find_available_port(configured_port)
+    print("\n" + "="*65)
+    print("🚀 SMART PRODUCT PRICE ALERT SYSTEM IS READY!")
+    print(f"👉 OPEN IN BROWSER: http://localhost:{port}")
+    print("="*65 + "\n")
     app.run(debug=True, host='0.0.0.0', port=port)
