@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Price Alert System - PriceTracker Pro</title>
+    <meta name="description" content="Automated real-time price tracking and notification system for ecommerce products.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-base: #0f172a;       /* Slate 900 */
+            --bg-surface: rgba(30, 41, 59, 0.75); /* Slate 800 with blur */
+            --text-primary: #f8fafc;  /* Slate 50 */
+            --text-secondary: #94a3b8;/* Slate 400 */
+            
+            --accent-primary: #3b82f6; /* Blue 500 */
+            --accent-hover: #2563eb;   /* Blue 600 */
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            
+            --success: #10b981;      /* Emerald 500 */
+            --success-bg: rgba(16, 185, 129, 0.12);
+            --danger: #ef4444;       /* Red 500 */
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --card-radius: 16px;
+            --input-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        /* Background Animated Glow Mesh */
+        .background-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.45;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, rgba(0,0,0,0) 70%);
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, rgba(0,0,0,0) 70%);
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 30%;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, rgba(0,0,0,0) 70%);
+            animation-duration: 25s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 30px) scale(1.1); }
+        }
+
+        /* Container Layout */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Glassmorphism Surface */
+        .glass-panel {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Top Header */
+        .glass-header {
+            text-align: center;
+            padding: 1.5rem 1rem 1rem;
+            position: relative;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Navigation Switcher Pills */
+        .nav-pills {
+            display: inline-flex;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 0.35rem;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+            gap: 0.3rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.45rem 1rem;
+            border-radius: 100px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .nav-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-btn.active {
+            background: var(--accent-primary);
+            color: #ffffff;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
+
+        /* User Profile Pill */
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 0.35rem 0.8rem;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .user-email-tag {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-logout {
+            color: var(--danger);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+            background: var(--danger-bg);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .logo i {
+            color: var(--accent-primary);
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Views Switching */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Components */
+        .form-card {
+            padding: 2.2rem;
+        }
+
+        .form-card h2 {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.4rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+
+        .form-card h2 i {
+            color: var(--accent-primary);
+        }
+
+        .auth-container {
+            max-width: 460px;
+            margin: 1.5rem auto 0;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .auth-header h2 {
+            font-size: 1.6rem;
+            border: none;
+            padding: 0;
+            justify-content: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .auth-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 0.25rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.95rem 1rem 0.95rem 2.8rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--input-radius);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        input:focus + i {
+            color: var(--accent-primary);
+        }
+
+        input::placeholder {
+            color: rgba(148, 163, 184, 0.5);
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.95rem 2rem;
+            border-radius: var(--input-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-switch-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-switch-link a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-switch-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-banner {
+            background: var(--danger-bg);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 0.85rem 1rem;
+            border-radius: var(--input-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Dashboard Active Alerts Section */
+        .dashboard {
+            margin-top: 2rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            transform: rotate(25deg);
+        }
+
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Alert Cards */
+        .alert-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-primary);
+            opacity: 0.6;
+        }
+
+        .alert-card.status-tracking::before { background: var(--accent-primary); }
+        .alert-card.status-notified::before { background: var(--success); }
+
+        .alert-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--glass-shadow);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .product-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            line-height: 1.4;
+            max-height: 2.8em;
+            flex: 1;
+            transition: var(--transition);
+        }
+
+        .product-title:hover {
+            color: var(--accent-primary);
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.35rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-delete:hover {
+            color: var(--danger);
+            background: var(--danger-bg);
+        }
+
+        .price-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: var(--input-radius);
+        }
+
+        .price-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-label {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .current-price .price-value { color: var(--text-primary); }
+        .target-price .price-value { color: var(--success); }
+
+        .price-arrow {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            font-size: 0.85rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
+        .status-tracking .status-badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
+        .status-notified .status-badge {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            position: relative;
+        }
+
+        .status-tracking .pulse-dot::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0;
+            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .date-text {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* States */
+        .loading-state {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3.5rem 2rem;
+            background: var(--bg-surface);
+            border: 1px dashed var(--glass-border);
+            border-radius: var(--card-radius);
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 0.9rem 1.4rem;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+            opacity: 0;
+            max-width: 90vw;
+        }
+
+        .toast:not(.hidden) {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--danger); }
+
+        @keyframes pulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .top-bar { justify-content: center; }
+            .logo { font-size: 1.8rem; }
+            .form-row { flex-direction: column; }
+            .form-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-user-email="{% if user_email %}{{ user_email }}{% endif %}" data-view="{% if current_view %}{{ current_view }}{% else %}dashboard{% endif %}" data-error="{% if error %}{{ error }}{% endif %}">
+    <div class="background-mesh">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Top Navigation & Brand Header -->
+        <header class="glass-header">
+            <div class="top-bar">
+                <!-- Navigation Tabs to switch views in the single file -->
+                <div class="nav-pills" id="navTabs">
+                    <button type="button" class="nav-btn active" data-target="dashboard">
+                        <i class="fa-solid fa-bell"></i>
+                        <span>Tracker</span>
+                    </button>
+                    <button type="button" class="nav-btn" data-target="login" id="navLogin">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </button>
+                    <button type="button" class="nav-btn" data-target="register" id="navRegister">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Register</span>
+                    </button>
+                </div>
+
+                <!-- User profile badge and logout -->
+                <div class="user-nav" id="userNav" style="display: none;">
+                    <span class="user-email-tag">
+                        <i class="fa-solid fa-user-circle"></i>
+                        <span id="userEmailDisplay">User</span>
+                    </span>
+                    <button type="button" class="btn-logout" id="logoutBtn" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="logo">
+                <i class="fa-solid fa-chart-line"></i>
+                <h1>PriceTracker <span>Pro</span></h1>
+            </div>
+            <p class="subtitle">Real-Time E-Commerce Price Tracking & Automated Email Alerts</p>
+        </header>
+
+        <!-- VIEW 1: Dashboard View (Create New Price Alert & Active Alerts) -->
+        <div id="view-dashboard" class="view-section active">
+            <!-- Create New Price Alert Card -->
+            <section class="form-card glass-panel">
+                <h2><i class="fa-solid fa-bell"></i> Create New Price Alert</h2>
+                <form id="addAlertForm">
+                    <div class="form-group">
+                        <label for="productUrl">Product Web URL</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-link"></i>
+                            <input type="url" id="productUrl" name="url" placeholder="Paste product URL here..." required autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="targetPrice">Target Alert Price (₹)</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-indian-rupee-sign"></i>
+                                <input type="number" id="targetPrice" name="target_price" step="any" min="1" placeholder="e.g. 49999" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        <span>Start Tracking</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Monitored Alerts Section -->
+            <section class="dashboard">
+                <div class="dashboard-header">
+                    <h2><i class="fa-solid fa-list-check"></i> Active Monitored Alerts</h2>
+                    <button id="refreshBtn" class="btn-icon" title="Refresh List"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+                
+                <div class="alerts-grid" id="alertsGrid">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Loading your active alerts...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW 2: Login View (Integrated directly in index.html) -->
+        <div id="view-login" class="view-section">
+            <div class="auth-container">
+                <section class="form-card glass-panel">
+                    <div class="auth-header">
+                        <h2><i class="fa-solid fa-arrow-right-to-bracket"></i> Welcome Back</h2>
+                        <p>Sign in to sync your price alerts</p>
+                    </div>
+
+                    <div id="loginError" class="error-banner" style="display: none;">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="loginErrorText"></span>
+                    </div>
+
+                    <form id="loginForm" action="/login" method="POST">
+                        <div class="form-group">
+                            <label for="loginEmail">Email Address</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-envelope"></i>
+                                <input type="email" id="loginEmail" name="email" placeholder="name@example.com" required autocomplete="email">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="loginPassword" name="password" placeholder="••••••••" required autocomplete="current-password">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="loginSubmitBtn">
+                            <span>Sign In</span>
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        </button>
+                    </form>
+
+                    <div class="auth-switch-link">
+                        Don't have an account? <a href="#register" class="switch-view-btn" data-target="register">Create Account</a>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- VIEW 3: Register View (Integrated directly in index.html) -->
+        <div id="view-register" class="view-section">
+            <div class="auth-container">
+                <section class="form-card glass-panel">
+                    <div class="auth-header">
+                        <h2><i class="fa-solid fa-user-plus"></i> Create Account</h2>
+                        <p>Track e-commerce prices & receive instant email alerts</p>
+                    </div>
+
+                    <div id="registerError" class="error-banner" style="display: none;">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="registerErrorText"></span>
+                    </div>
+
+                    <form id="registerForm" action="/register" method="POST">
+                        <div class="form-group">
+                            <label for="regUsername">Username</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-user"></i>
+                                <input type="text" id="regUsername" name="username" placeholder="johndoe" required autocomplete="username">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="regEmail">Email Address</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-envelope"></i>
+                                <input type="email" id="regEmail" name="email" placeholder="name@example.com" required autocomplete="email">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="regPassword">Password</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="regPassword" name="password" placeholder="••••••••" required autocomplete="new-password">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="registerSubmitBtn">
+                            <span>Create Account</span>
+                            <i class="fa-solid fa-user-check"></i>
+                        </button>
+                    </form>
+
+                    <div class="auth-switch-link">
+                        Already have an account? <a href="#login" class="switch-view-btn" data-target="login">Sign In</a>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check toast-icon"></i>
+        <span id="toastMessage">Alert status updated</span>
+    </div>
+
+    <!-- Application Logic Embedded in index.html -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Determine backend API host: supports both direct Flask (port 5000) and any Live Server port (port 5500, etc.)
+            // --- Backend API URL Configuration ---
+            // 1. GitHub Pages / static hosting  -> use Render backend URL
+            // 2. Local Live Server (port 5500)   -> use local Flask (port 5000)
+            // 3. Served by Flask itself           -> use relative URLs (empty string)
+            const RENDER_BACKEND_URL = 'https://price-tracker-pro.onrender.com'; // <-- UPDATE after deploying to Render
+            const isGithubPages = window.location.hostname.includes('github.io');
+            const isLocalStatic = window.location.protocol === 'file:' || 
+                                  (window.location.port && window.location.port === '5500');
+            const API_BASE = isGithubPages ? RENDER_BACKEND_URL
+                           : isLocalStatic  ? 'http://127.0.0.1:5000'
+                           : '';  // Served by Flask directly
+
+            // Read context from safe data attributes (prevents template syntax errors)
+            const body = document.body;
+            const rawEmail = (body.getAttribute('data-user-email') || '').trim();
+            const rawView = (body.getAttribute('data-view') || '').trim();
+            const rawError = (body.getAttribute('data-error') || '').trim();
+
+            let currentUserEmail = '';
+            if (rawEmail && !rawEmail.includes('{') && rawEmail !== 'None') {
+                currentUserEmail = rawEmail;
+            }
+
+            let initialView = 'dashboard';
+            if (rawView && !rawView.includes('{')) {
+                initialView = rawView;
+            }
+
+            let serverError = '';
+            if (rawError && !rawError.includes('{')) {
+                serverError = rawError;
+            }
+
+            // Elements
+            const navTabs = document.querySelectorAll('.nav-btn');
+            const viewSections = {
+                dashboard: document.getElementById('view-dashboard'),
+                login: document.getElementById('view-login'),
+                register: document.getElementById('view-register')
+            };
+
+            const userNav = document.getElementById('userNav');
+            const userEmailDisplay = document.getElementById('userEmailDisplay');
+            const navLogin = document.getElementById('navLogin');
+            const navRegister = document.getElementById('navRegister');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            const addAlertForm = document.getElementById('addAlertForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const alertsGrid = document.getElementById('alertsGrid');
+            const refreshBtn = document.getElementById('refreshBtn');
+
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const loginError = document.getElementById('loginError');
+            const loginErrorText = document.getElementById('loginErrorText');
+            const registerError = document.getElementById('registerError');
+            const registerErrorText = document.getElementById('registerErrorText');
+
+            const toast = document.getElementById('toast');
+            const toastIcon = toast.querySelector('i');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // --- View Switching Engine ---
+            function showView(viewName) {
+                // Deactivate all views
+                Object.values(viewSections).forEach(sec => sec.classList.remove('active'));
+                navTabs.forEach(btn => btn.classList.remove('active'));
+
+                // Activate selected view
+                if (viewSections[viewName]) {
+                    viewSections[viewName].classList.add('active');
+                } else {
+                    viewSections.dashboard.classList.add('active');
+                    viewName = 'dashboard';
+                }
+
+                // Update active tab button
+                const activeBtn = document.querySelector(`.nav-btn[data-target="${viewName}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+
+                // If switching to dashboard, load alerts
+                if (viewName === 'dashboard') {
+                    fetchAlerts();
+                }
+            }
+
+            // Setup Tab Buttons
+            navTabs.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showView(btn.getAttribute('data-target'));
+                });
+            });
+
+            // Setup Link View Switchers
+            document.querySelectorAll('.switch-view-btn').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showView(link.getAttribute('data-target'));
+                });
+            });
+
+            // Update Auth Header UI State
+            function updateAuthState(email) {
+                currentUserEmail = email || '';
+                if (currentUserEmail) {
+                    userEmailDisplay.textContent = currentUserEmail;
+                    userNav.style.display = 'flex';
+                    if (navLogin) navLogin.style.display = 'none';
+                    if (navRegister) navRegister.style.display = 'none';
+                } else {
+                    userNav.style.display = 'none';
+                    if (navLogin) navLogin.style.display = 'inline-flex';
+                    if (navRegister) navRegister.style.display = 'inline-flex';
+                }
+            }
+
+            // Check server auth status
+            async function checkAuthStatus() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/auth/status`, {
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.authenticated) {
+                            updateAuthState(data.email);
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    // Running in pure static mode without Flask
+                }
+                updateAuthState(currentUserEmail);
+                return false;
+            }
+
+            // --- Form Submissions with AJAX + Graceful Fallbacks ---
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loginError.style.display = 'none';
+                const submitBtn = document.getElementById('loginSubmitBtn');
+                submitBtn.disabled = true;
+
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+
+                try {
+                    const res = await fetch(`${API_BASE}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password }),
+                        credentials: 'include'
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+
+                    if (res.ok && data.success) {
+                        showToast('Successfully logged in!', 'success');
+                        updateAuthState(data.email || email);
+                        showView('dashboard');
+                    } else {
+                        loginErrorText.textContent = data.message || 'Invalid email or password.';
+                        loginError.style.display = 'flex';
+                    }
+                } catch (err) {
+                    if (!isLocalStatic) {
+                        loginForm.submit();
+                    } else {
+                        loginErrorText.textContent = 'Flask backend is not running. Please start "python app.py".';
+                        loginError.style.display = 'flex';
+                    }
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                registerError.style.display = 'none';
+                const submitBtn = document.getElementById('registerSubmitBtn');
+                submitBtn.disabled = true;
+
+                const username = document.getElementById('regUsername').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value;
+
+                try {
+                    const res = await fetch(`${API_BASE}/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, password }),
+                        credentials: 'include'
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+
+                    if (res.ok && data.success) {
+                        showToast('Account created successfully!', 'success');
+                        updateAuthState(data.email || email);
+                        showView('dashboard');
+                    } else {
+                        registerErrorText.textContent = data.message || 'Registration failed.';
+                        registerError.style.display = 'flex';
+                    }
+                } catch (err) {
+                    if (!isLocalStatic) {
+                        registerForm.submit();
+                    } else {
+                        registerErrorText.textContent = 'Flask backend is not running. Please start "python app.py".';
+                        registerError.style.display = 'flex';
+                    }
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await fetch(`${API_BASE}/logout`, {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                } catch (e) {
+                    // ignore
+                }
+                updateAuthState('');
+                showToast('Signed out successfully.', 'success');
+                showView('dashboard');
+            });
+
+            // --- Add Alert Engine ---
+            addAlertForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(addAlertForm);
+                const url = formData.get('url').trim();
+                const target_price = formData.get('target_price');
+
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    showToast('Please enter a valid product URL (http or https).', 'error');
+                    return;
+                }
+
+                setLoadingState(true);
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/alerts`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url, target_price }),
+                        credentials: 'include'
+                    });
+
+                    if (response.status === 401) {
+                        showToast('Please sign in to track alerts.', 'error');
+                        showView('login');
+                        return;
+                    }
+
+                    const data = await response.json().catch(() => ({}));
+
+                    if (response.ok && data.success) {
+                        showToast(data.message || 'Alert added successfully!', 'success');
+                        addAlertForm.reset();
+                        fetchAlerts();
+                    } else {
+                        showToast(data.message || 'Failed to add alert.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error adding alert:', error);
+                    if (isLocalStatic) {
+                        showToast('To track live prices, please start Flask: python app.py', 'error');
+                    } else {
+                        showToast('Network error while connecting to server.', 'error');
+                    }
+                } finally {
+                    setLoadingState(false);
+                }
+            });
+
+            refreshBtn.addEventListener('click', async () => {
+                const icon = refreshBtn.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-rotate-right fa-spin';
+                showToast('Checking latest product prices...', 'success');
+                try {
+                    const res = await fetch(`${API_BASE}/api/alerts/refresh`, {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.message) showToast(data.message, 'success');
+                    }
+                } catch (e) {
+                    // Fallback to fetchAlerts
+                } finally {
+                    if (icon) icon.className = 'fa-solid fa-rotate-right';
+                    fetchAlerts();
+                }
+            });
+
+            // Fetch active alerts
+            async function fetchAlerts() {
+                alertsGrid.innerHTML = `
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Loading your active alerts...</p>
+                    </div>
+                `;
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/alerts`, {
+                        credentials: 'include'
+                    });
+
+                    if (response.status === 401) {
+                        alertsGrid.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-solid fa-lock" style="color: var(--accent-primary);"></i>
+                                <h3>Sign In Required</h3>
+                                <p>Please <a href="#login" class="switch-view-btn" data-target="login" style="color: var(--accent-primary); font-weight: 600;">Sign In</a> or <a href="#register" class="switch-view-btn" data-target="register" style="color: var(--accent-primary); font-weight: 600;">Create an Account</a> to monitor active alerts.</p>
+                            </div>
+                        `;
+                        alertsGrid.querySelectorAll('.switch-view-btn').forEach(el => {
+                            el.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                showView(el.getAttribute('data-target'));
+                            });
+                        });
+                        return;
+                    }
+
+                    const alerts = await response.json();
+
+                    if (!Array.isArray(alerts) || alerts.length === 0) {
+                        alertsGrid.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-regular fa-bell-slash"></i>
+                                <h3>No Active Monitored Alerts</h3>
+                                <p>Paste a product link above and set your desired target price to begin tracking.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    alertsGrid.innerHTML = alerts.map(alert => createAlertCard(alert)).join('');
+
+                    alertsGrid.querySelectorAll('.btn-delete').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const id = e.currentTarget.dataset.id;
+                            deleteAlert(id);
+                        });
+                    });
+
+                } catch (error) {
+                    if (isLocalStatic) {
+                        alertsGrid.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-solid fa-bell" style="color: var(--accent-primary)"></i>
+                                <h3>Live Server Preview Ready</h3>
+                                <p>To fetch and scrape real ecommerce products, run <code>python app.py</code> in your terminal.</p>
+                            </div>
+                        `;
+                    } else {
+                        alertsGrid.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger)"></i>
+                                <h3>Could Not Load Alerts</h3>
+                                <p>Click the refresh button to try again.</p>
+                            </div>
+                        `;
+                    }
+                }
+            }
+
+            async function deleteAlert(id) {
+                if (!confirm('Are you sure you want to remove this product alert?')) return;
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/alerts/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        showToast('Alert removed successfully', 'success');
+                        fetchAlerts();
+                    } else {
+                        const data = await response.json();
+                        showToast(data.message || 'Failed to delete alert', 'error');
+                    }
+                } catch (error) {
+                    showToast('Network error occurred.', 'error');
+                }
+            }
+
+            function createAlertCard(alert) {
+                const isTargetReached = Boolean(alert.is_notified) || 
+                    (alert.current_price !== null && alert.current_price !== undefined && 
+                     alert.target_price !== null && alert.target_price !== undefined && 
+                     Number(alert.current_price) <= Number(alert.target_price));
+
+                const statusClass = isTargetReached ? 'status-notified' : 'status-tracking';
+                const statusIcon = isTargetReached ? '<i class="fa-solid fa-check"></i>' : '<div class="pulse-dot"></div>';
+                const statusText = isTargetReached ? 'Target Reached' : 'Tracking';
+                
+                const currentPriceFormat = alert.current_price !== null && alert.current_price !== undefined
+                    ? `₹${Number(alert.current_price).toLocaleString('en-IN')}`
+                    : 'Checking...';
+                const targetPriceFormat = `₹${Number(alert.target_price).toLocaleString('en-IN')}`;
+
+                return `
+                    <div class="alert-card ${statusClass}">
+                        <div class="card-header">
+                            <a href="${alert.product_url}" target="_blank" rel="noopener noreferrer" class="product-title" title="${escapeHtml(alert.product_name)}">
+                                ${escapeHtml(alert.product_name)}
+                            </a>
+                            <button class="btn-delete" data-id="${alert.id}" title="Delete Alert">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+
+                        <div class="price-container">
+                            <div class="price-box current-price">
+                                <span class="price-label">Current Price</span>
+                                <span class="price-value">${currentPriceFormat}</span>
+                            </div>
+                            
+                            <div class="price-arrow">
+                                <i class="fa-solid fa-arrow-right-long"></i>
+                            </div>
+
+                            <div class="price-box target-price">
+                                <span class="price-label">Target Price</span>
+                                <span class="price-value">${targetPriceFormat}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="status-badge">
+                                ${statusIcon}
+                                <span>${statusText}</span>
+                            </div>
+                            <div class="date-text">
+                                <i class="fa-regular fa-clock"></i>
+                                <span>${new Date(alert.created_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            function setLoadingState(isLoading) {
+                submitBtn.disabled = isLoading;
+                const btnText = submitBtn.querySelector('span');
+                const btnIcon = submitBtn.querySelector('i');
+                if (isLoading) {
+                    btnText.textContent = 'Scraping & Adding Alert...';
+                    btnIcon.className = 'fa-solid fa-circle-notch fa-spin';
+                } else {
+                    btnText.textContent = 'Start Tracking';
+                    btnIcon.className = 'fa-solid fa-paper-plane';
+                }
+            }
+
+            let toastTimeout = null;
+            function showToast(message, type = 'success') {
+                toastMessage.textContent = message;
+                toast.className = `toast ${type}`;
+                if (type === 'success') {
+                    toastIcon.className = 'fa-solid fa-circle-check toast-icon';
+                } else {
+                    toastIcon.className = 'fa-solid fa-circle-exclamation toast-icon';
+                }
+
+                setTimeout(() => toast.classList.remove('hidden'), 10);
+                
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 4500);
+            }
+
+            // Display server error if passed
+            if (serverError) {
+                if (initialView === 'login') {
+                    loginErrorText.textContent = serverError;
+                    loginError.style.display = 'flex';
+                } else if (initialView === 'register') {
+                    registerErrorText.textContent = serverError;
+                    registerError.style.display = 'flex';
+                }
+            }
+
+            // Initial view setup
+            checkAuthStatus();
+            
+            // Check hash in URL e.g. #login, #register, #dashboard
+            const hash = window.location.hash.replace('#', '');
+            if (hash === 'login' || hash === 'register') {
+                showView(hash);
+            } else {
+                showView(initialView || 'dashboard');
+            }
+        });
+    </script>
+</body>
+</html>

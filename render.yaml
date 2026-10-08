@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: price-tracker-pro
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app -c gunicorn_config.py
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SMTP_SERVER
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        value: pricealert167@gmail.com
+      - key: SMTP_PASSWORD
+        value: gnfynlwmhwbgskxc
+      - key: RENDER
+        value: "true"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
