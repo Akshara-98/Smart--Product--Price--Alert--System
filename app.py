@@ -208,11 +208,11 @@ def add_alert():
     if not url or target_price is None:
         return jsonify({'success': False, 'message': 'Missing required fields (url, target_price)'}), 400
 
-    # Validate URL is from a supported site
+    # Validate URL
     if not scraper.is_supported_url(url):
         return jsonify({
             'success': False,
-            'message': 'Unsupported site. Supported: Amazon, Flipkart, Myntra, Meesho, AJIO, Nykaa, Snapdeal, Tata CLiQ, and more.'
+            'message': 'Please enter a valid product URL (http or https).'
         }), 400
 
     user_id = session['user_id']
@@ -253,9 +253,9 @@ def add_alert():
              db.session.commit()
              
              if email_sent:
-                 return jsonify({'success': True, 'message': 'Target price is already reached! Alert email sent to your inbox.'})
+                 return jsonify({'success': True, 'message': 'Target price reached! Alert email has been sent to your inbox.'})
              else:
-                 return jsonify({'success': True, 'message': 'Target price is already reached! (Configure SMTP in .env to receive email alerts).'})
+                 return jsonify({'success': True, 'message': 'Target price reached! Alert removed.'})
 
         return jsonify({'success': True, 'message': 'Alert added successfully! Monitoring initialized.'})
 

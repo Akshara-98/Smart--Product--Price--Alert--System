@@ -294,38 +294,6 @@
             color: rgba(148, 163, 184, 0.5);
         }
 
-        .url-hint {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 0.3rem;
-            padding-left: 0.25rem;
-            transition: var(--transition);
-        }
-
-        .url-hint.valid {
-            color: var(--success);
-        }
-
-        .url-hint.invalid {
-            color: var(--danger);
-        }
-
-        .supported-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 0.4rem;
-        }
-
-        .chip {
-            font-size: 0.72rem;
-            padding: 0.2rem 0.55rem;
-            border-radius: 100px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: var(--text-secondary);
-        }
-
         .btn-primary {
             background: var(--accent-primary);
             color: white;
@@ -749,18 +717,7 @@
                         <label for="productUrl">Product Web URL</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-link"></i>
-                            <input type="url" id="productUrl" name="url" placeholder="https://www.amazon.in/dp/... or Flipkart, Myntra, Meesho, AJIO link" required autocomplete="off">
-                        </div>
-                        <p id="urlHint" class="url-hint">Supported platforms: Amazon, Flipkart, Myntra, Meesho, AJIO, Nykaa, Snapdeal, Tata CLiQ</p>
-                        <div class="supported-chips">
-                            <span class="chip">Amazon</span>
-                            <span class="chip">Flipkart</span>
-                            <span class="chip">Myntra</span>
-                            <span class="chip">Meesho</span>
-                            <span class="chip">AJIO</span>
-                            <span class="chip">Tata CLiQ</span>
-                            <span class="chip">Nykaa</span>
-                            <span class="chip">Snapdeal</span>
+                            <input type="url" id="productUrl" name="url" placeholder="Paste product URL here..." required autocomplete="off">
                         </div>
                     </div>
                     
@@ -816,51 +773,14 @@
             const toast = document.getElementById('toast');
             const toastIcon = toast.querySelector('i');
             const toastMessage = document.getElementById('toastMessage');
-            const urlInput = document.getElementById('productUrl');
-            const urlHint = document.getElementById('urlHint');
 
-            // Supported domains list
-            const SUPPORTED_DOMAINS = [
-                'amazon.in', 'amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es', 'amazon.ca', 'amazon.co.jp',
-                'amzn.to', 'amzn.eu',
-                'flipkart.com', 'shopsy.in',
-                'myntra.com',
-                'meesho.com',
-                'ajio.com',
-                'nykaa.com',
-                'snapdeal.com',
-                'tatacliq.com',
-                'reliancedigital.in',
-                'croma.com',
-            ];
-
-            function isSupportedUrl(url) {
+            function isValidUrl(string) {
                 try {
-                    const hostname = new URL(url).hostname.replace('www.', '').toLowerCase();
-                    if (hostname.includes('amazon') || hostname === 'amzn.to' || hostname === 'amzn.eu') {
-                        return true;
-                    }
-                    return SUPPORTED_DOMAINS.some(d => hostname === d || hostname.endsWith('.' + d));
-                } catch { 
-                    return false; 
+                    const url = new URL(string);
+                    return url.protocol === 'http:' || url.protocol === 'https:';
+                } catch (_) {
+                    return false;
                 }
-            }
-
-            // Real-time URL validation hint
-            if (urlInput && urlHint) {
-                urlInput.addEventListener('input', () => {
-                    const val = urlInput.value.trim();
-                    if (!val) {
-                        urlHint.className = 'url-hint';
-                        urlHint.textContent = 'Supported platforms: Amazon, Flipkart, Myntra, Meesho, AJIO, Nykaa, Snapdeal, Tata CLiQ';
-                    } else if (isSupportedUrl(val)) {
-                        urlHint.className = 'url-hint valid';
-                        urlHint.textContent = '✅ Supported e-commerce product URL detected!';
-                    } else {
-                        urlHint.className = 'url-hint invalid';
-                        urlHint.textContent = '⚠️ Unsupported site. Supported: Amazon, Flipkart, Myntra, Meesho, AJIO, etc.';
-                    }
-                });
             }
 
             // Setup event listeners
@@ -877,8 +797,8 @@
                 const url = formData.get('url').trim();
                 const target_price = formData.get('target_price');
 
-                if (!isSupportedUrl(url)) {
-                    showToast('Unsupported product URL. Use Amazon, Flipkart, Myntra, Meesho, etc.', 'error');
+                if (!isValidUrl(url)) {
+                    showToast('Please enter a valid product URL (http or https).', 'error');
                     return;
                 }
 
@@ -896,10 +816,6 @@
                     if (response.ok && data.success) {
                         showToast(data.message, 'success');
                         form.reset();
-                        if (urlHint) {
-                            urlHint.className = 'url-hint';
-                            urlHint.textContent = 'Supported platforms: Amazon, Flipkart, Myntra, Meesho, AJIO, Nykaa, Snapdeal, Tata CLiQ';
-                        }
                         fetchAlerts();
                     } else {
                         showToast(data.message || 'Failed to add alert', 'error');

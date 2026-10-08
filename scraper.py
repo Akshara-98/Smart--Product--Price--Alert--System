@@ -44,19 +44,11 @@ SUPPORTED_DOMAINS = [
 ]
 
 def is_supported_url(url):
-    """Check if a URL is from a supported e-commerce site."""
+    """Check if a URL is a valid web URL."""
     try:
-        domain = urlparse(url).netloc.lower().replace('www.', '')
-        
-        # Explicit domain matches
-        for supported in SUPPORTED_DOMAINS:
-            if domain == supported or domain.endswith('.' + supported):
-                return True
-        
-        # Broad Amazon check for all regions (e.g. amazon.co.jp, amazon.ca)
-        if 'amazon' in domain or 'amzn.' in domain:
-            return True
-            
+        parsed = urlparse(url)
+        return bool(parsed.scheme in ['http', 'https'] and parsed.netloc)
+    except Exception:
         return False
     except Exception:
         return False
