@@ -12,14 +12,16 @@ from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv
 
-# Load environment variables if present
-load_dotenv()
+from pathlib import Path
+dotenv_path = Path(__file__).resolve().parent / '.env'
+load_dotenv(dotenv_path=dotenv_path)
 
 # Built-in SMTP Configuration
-SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com").strip('\"\'')
 SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "pricealert167@gmail.com").strip('\"\'')
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "gnfynlwmhwbjskxc").strip('\"\'').replace(" ", "")
+# Correct Google App Password: gnfynlwmhwbgskxc
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "gnfynlwmhwbgskxc").strip('\"\'').replace(" ", "")
 
 def send_price_alert(user_email, product_name, current_price, target_price, product_url):
     """
@@ -27,14 +29,19 @@ def send_price_alert(user_email, product_name, current_price, target_price, prod
     Sender: SMTP_USERNAME (pricealert167@gmail.com)
     Recipient: user_email (the user's email)
     """
-    if not user_email:
+    if not user_email or not user_email.strip():
         print("ERROR: Recipient email address is missing.")
         return False
 
-    server_host = os.environ.get("SMTP_SERVER", SMTP_SERVER)
+    user_email = user_email.strip()
+    server_host = os.environ.get("SMTP_SERVER", SMTP_SERVER).strip('\"\'')
     server_port = int(os.environ.get("SMTP_PORT", SMTP_PORT))
     sender_user = os.environ.get("SMTP_USERNAME", SMTP_USERNAME).strip('\"\'')
     sender_pass = os.environ.get("SMTP_PASSWORD", SMTP_PASSWORD).strip('\"\'').replace(" ", "")
+
+    # Sanity check password fallback if environment was empty or wrong
+    if not sender_pass or sender_pass == "gnfynlwmhwbjskxc":
+        sender_pass = "gnfynlwmhwbgskxc"
 
     if not sender_user or not sender_pass:
         print(f"ERROR: SMTP credentials missing. Skipping email to {user_email}.")
