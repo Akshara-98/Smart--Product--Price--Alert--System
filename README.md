@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚀 PriceTracker Pro
 
 A full-stack, real-time e-commerce price tracking and automated email alert web application.
@@ -75,3 +76,6 @@ git remote add origin https://github.com/<your-username>/<your-repo-name>.git
 git push -u origin main
 ```
 
+=======
+# Smart--Product--Price--Alert--System
+>>>>>>> origin/main
