@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # 🚀 PriceTracker Pro
 
 A full-stack, real-time e-commerce price tracking and automated email alert web application.
