@@ -451,12 +451,9 @@ def find_available_port(default_port=5000):
                 return p
     return default_port
 
-if __name__ == '__main__':
-    configured_port = int(os.environ.get('PORT', 5000))
-    port = find_available_port(configured_port)
-    print("\n" + "="*65)
-    print("🚀 SMART PRODUCT PRICE ALERT SYSTEM IS READY!")
-    print(f"👉 OPEN IN BROWSER: http://localhost:{port}")
-    print("="*65 + "\n")
-    app.run(debug=True, host='0.0.0.0', port=port)
 
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
