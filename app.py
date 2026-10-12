@@ -458,5 +458,5 @@ if __name__ == '__main__':
     print("🚀 SMART PRODUCT PRICE ALERT SYSTEM IS READY!")
     print(f"👉 OPEN IN BROWSER: http://localhost:{port}")
     print("="*65 + "\n")
-    app.run(debug=True, host='0.0.0.0', port=port,reload=True)
+    app.run(debug=True, host='0.0.0.0', port=port)
 
